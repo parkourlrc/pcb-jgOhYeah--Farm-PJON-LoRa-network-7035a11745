@@ -4,23 +4,19 @@
 ; Created 22/02/2023
 ; Modified 22/03/2023
 
-#DEFINE VERSION "v2.0.2"
-#DEFINE NAME "Battery voltage monitor and fence control"
+#DEFINE VERSION "v0.0.0"
+#DEFINE NAME "Farm gate monitor"
 #DEFINE URL "https://github.com/jgOhYeah/Farm-PJON-LoRa-network"
 #PICAXE 18M2
 #TERMINAL 38400
 ; #COM /dev/ttyUSB0
-
-; Sensors
-#DEFINE ENABLE_TEMP
-; #DEFINE ENABLE_FVR
 
 ; Sensors and control
 symbol BATTERY_PIN = C.2
 symbol I2C_SDA_PIN = B.1
 symbol I2C_SCL_PIN = B.4
 symbol LIGHT_PIN = B.6
-symbol PIR_PIN = C.6
+symbol PIR_PIN = pinC.6
 symbol LDR_PIN = C.1 ; TODO: Probably not needed.
 symbol GATE_PIN = pinC.0
 
@@ -29,17 +25,20 @@ symbol LED_PIN = C.7
 
 ; Variables unique to this - see symbols.basinc for the rest
 symbol light_enable = bit0
-symbol transmit_enable = bit1
 symbol long_listen_time = bit2
-symbol tx_intervals = b18
-symbol tx_interval_count = b19
+symbol gate_state = bit3
+symbol movement_state = bit4
+symbol tx_intervals = b19 ; Stores how many intervals * 16 to send a RX message.
+symbol interval_count = w8 ; Increments once each iteration - alternative to time when sleeping.
+symbol last_tx_interval = s_w0 ; Not using multitasking, so ok to use.
+symbol last_motion_detect = s_w1
 
 ; TableSertxd extension settings
 ; Before conversion to tablesertxd: 2005
 ; After conversion to tablesertxd: 1765
 #DEFINE TABLE_SERTXD_ADDRESS_VAR w6 ; b12, b13
 #DEFINE TABLE_SERTXD_ADDRESS_END_VAR w7 ; b14, b15
-#DEFINE TABLE_SERTXD_TMP_BYTE b16
+#DEFINE TABLE_SERTXD_TMP_BYTE b18
 
 ; Constants
 symbol LISTEN_TIME_NORMAL = 30 ; Listen for 15s (number of 0.5s counts) after each transmission and every so often.
@@ -52,8 +51,11 @@ symbol RESET_CODE = 101 ; Needs to be present as the payload of the reset comman
 symbol TEMP_DIFFERENCE_THRESHOLD = 63
 
 ; Temperature and battery voltage calibration
-symbol CAL_BATT_NUMERATOR = 58
-symbol CAL_BATT_DENOMINATOR = 85
+symbol CAL_BATT_NUMERATOR = 4
+symbol CAL_BATT_DENOMINATOR = 15
+
+; Minimum number of intervals between motion detection events.
+symbol MD_MIN_TIME = 100
 
 #MACRO UPDATE_EEPROM(ADDRESS,VALUE,TMP_VAR)
 	read ADDRESS, TMP_VAR
@@ -63,10 +65,8 @@ symbol CAL_BATT_DENOMINATOR = 85
 #ENDMACRO
 
 symbol EEPROM_LIGHT_ENABLED = 0
-symbol EEPROM_TX_ENABLED = 1
-symbol EEPROM_TX_INTERVALS = 2
+symbol EEPROM_TX_INTERVALS = 1
 
 ; Values to be loaded into EEPROM on slot 0 upload
-symbol DEFAULT_LIGHT_ENABLED = 1
-symbol DEFAULT_TX_ENABLED = 1
-symbol DEFAULT_TX_INTERVALS = 10
+symbol DEFAULT_LIGHT_ENABLED = 0
+symbol DEFAULT_TX_INTERVALS = 1

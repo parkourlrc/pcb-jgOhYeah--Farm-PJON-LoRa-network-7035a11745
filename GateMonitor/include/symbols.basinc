@@ -60,7 +60,7 @@ symbol UPRSTEAM_ADDRESS = 255 ; Address to send things to using PJON
 
 symbol TL_RESPONSE_TIME_OUT = 1 ; Number of 1/2 seconds after which it is presumed that the signal was never received.
 symbol TL_MAX_ATTEMPTS = 10 ; 10 attempts.
-symbol TL_RETRY_DELAY = 5000 ; How long between retry attempts (not doing exponential backup just yet).
+symbol TL_RETRY_DELAY = 100 ; How long between retry attempts (not doing exponential backup just yet).
 symbol TL_RESPONSE_LENGTH = 5 ; The number of bytes sent on the response (acknowledgement).
 
 #DEFINE FILE_SYMBOLS_INCLUDED ; Prove this file is included properly

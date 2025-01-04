@@ -121,7 +121,8 @@ end_pjon_packet_ack_single:
 	; Sends a PJON packet and requests acknowledgement.
 	; param1 contains the id to send to.
 	; bptr points to the address after the last byte to send.
-	; Max stack depth used: 6
+	; Max stack depth used: 6???
+	; The radio will be left in the receive state on return (assuming the radio is still connected and communicating correctly).
 	; Send the message
 	counter = PACKET_HEADER_ACK
 	gosub end_pjon_packet_header
@@ -165,6 +166,7 @@ end_pjon_packet_ack:
 	; Sends a PJON packet and requests acknowledgement. If nothing is received, will try again, with a total of TL_MAX_ATTEMPTS attempts.
 	; param1 contains the id to send to.
 	; bptr points to the address after the last byte to send.
+	; The radio will be left in the receive state on return (assuming the radio is still connected and communicating correctly).
 	last_address = bptr ; Address of the byte after the end of the message (save for later attempts).
 	counter3 = param1 ; Who to send to (save for later).
 	for total_length = 1 to TL_MAX_ATTEMPTS
@@ -175,6 +177,8 @@ end_pjon_packet_ack:
 
 		; Check if this was successful or not.
 		if rtrn = LORA_RADIO_SUCCESS then exit
+
+		pause TL_RETRY_DELAY
 	next total_length
 	; rtrn will contain the result of the last attempt.
 	return

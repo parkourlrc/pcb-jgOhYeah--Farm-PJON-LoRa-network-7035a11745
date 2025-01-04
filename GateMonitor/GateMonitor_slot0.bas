@@ -26,8 +26,7 @@
 #TERMINAL 38400
 
 ; Default settings on upload
-eeprom EEPROM_LIGHT_ENABLED, (DEFAULT_light_enableD)
-eeprom EEPROM_TX_ENABLED, (DEFAULT_TX_ENABLED)
+eeprom EEPROM_LIGHT_ENABLED, (DEFAULT_LIGHT_ENABLED)
 eeprom EEPROM_TX_INTERVALS, (DEFAULT_TX_INTERVALS)
 
 init:
@@ -38,7 +37,6 @@ init:
 
 	; Load settings from EEPROM
 	read EEPROM_LIGHT_ENABLED, light_enable
-	read EEPROM_TX_ENABLED,  transmit_enable
 	read EEPROM_TX_INTERVALS, tx_intervals
 	if light_enable = 1 then
 		high LIGHT_PIN
